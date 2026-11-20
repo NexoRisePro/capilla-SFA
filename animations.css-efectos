@@ -1,0 +1,168 @@
+/**
+ * ====================================================================
+ * ANIMACIONES SACRAS Y EFECTOS CINEMATOGRÁFICOS
+ * Capilla San Francisco de Asís
+ * ====================================================================
+ */
+
+/* Dibujo Progresivo de Trazo Vectorial (Stroke Drawing) */
+@keyframes strokeDraw {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Resplandor Dorado y Luz Divina */
+@keyframes goldGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4)) drop-shadow(0 0 15px rgba(212, 175, 55, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 28px rgba(212, 175, 55, 0.4));
+  }
+}
+
+/* Efecto de destello dorado sutil que recorre el logo */
+@keyframes shimmerLine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Revelación de relleno de logo */
+@keyframes revealLogoFill {
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Efecto Ken Burns para imágenes sacras del carrusel */
+@keyframes kenBurnsZoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Pulso sutil para WhatsApp y badges */
+@keyframes subtlePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+  }
+}
+
+/* Clases utilitarias de animación */
+.draw-stroke {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke 0.5s ease;
+}
+
+.animating-stroke {
+  animation: strokeDraw 3.2s cubic-bezier(0.45, 0, 0.15, 1) forwards;
+}
+
+.gold-glow {
+  animation: goldGlow 3s ease-in-out infinite;
+}
+
+.reveal-fill {
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-fill.filled-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.reveal-text {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.reveal-text.text-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-out-intro {
+  opacity: 0 !important;
+  transform: scale(1.02);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ken-burns-active {
+  animation: kenBurnsZoom 20s ease-in-out infinite alternate;
+}
+
+.whatsapp-pulse {
+  animation: subtlePulse 3.5s ease-in-out infinite;
+}
+
+/* Foco de Luz Ambiental del Cursor (Spotlight) */
+#cursor-spotlight {
+  position: fixed;
+  top: -200px;
+  left: -200px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(121, 70, 37, 0.03) 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.9;
+  transition: opacity 0.4s ease;
+  will-change: transform;
+}
+
+/* Desactivación estricta para movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animating-stroke {
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+  .reveal-fill {
+    opacity: 1 !important;
+  }
+  .reveal-text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  #cursor-spotlight {
+    display: none !important;
+  }
+}
