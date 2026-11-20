@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capilla San Francisco de Asís | Parroquia La Santa Cruz - Diócesis de Chosica</title>
+  <meta name="description" content="Portal oficial de la Capilla San Francisco de Asís en Chosica. Horarios de Santa Misa, sacramentos, bautizos, catequesis, avisos parroquiales y vida comunitaria. Paz y Bien.">
+  <meta name="keywords" content="Capilla San Francisco de Asís, Parroquia La Santa Cruz, Diócesis de Chosica, Misas en Chosica, Bautizos, Catequesis, Iglesia Católica Chosica">
+  <meta name="author" content="Capilla San Francisco de Asís">
+
+  <!-- Open Graph / Redes Sociales -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Capilla San Francisco de Asís · Chosica">
+  <meta property="og:description" content="Un espacio de encuentro, oración y esperanza. Bienvenidos a nuestra comunidad de fe franciscana.">
+  <meta property="og:image" content="assets/images/logo-capilla.jpg">
+  <meta property="og:locale" content="es_PE">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Capilla San Francisco de Asís · Chosica">
+  <meta name="twitter:description" content="Horarios de misas, sacramentos, avisos e informes parroquiales en Chosica.">
+
+  <!-- Schema.org JSON-LD para Iglesia Católica / Lugar de Culto -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CatholicChurch",
+    "name": "Capilla San Francisco de Asís",
+    "parentOrganization": {
+      "@type": "Church",
+      "name": "Parroquia La Santa Cruz - Diócesis de Chosica"
+    },
+    "description": "Un espacio de encuentro, oración y esperanza en Chosica.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Jr. Los Franciscanos s/n (Ref. Paradero La Santa Cruz)",
+      "addressLocality": "Chosica",
+      "addressRegion": "Lima",
+      "addressCountry": "PE"
+    },
+    "telephone": "+51-987-654-321",
+    "openingHours": "Mo-Su 07:30-20:30"
+  }
+  </script>
+
+  <!-- Google Fonts: Cinzel (Serif Sacro), Great Vibes (Caligrafía Franciscana), Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Great+Vibes&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            franciscan: {
+              50: '#FAF6F0',
+              100: '#F3ECE2',
+              200: '#E4D3C0',
+              300: '#D1B499',
+              400: '#B88F6D',
+              500: '#965B33',
+              600: '#864D27',
+              700: '#794625', // Color principal del logo oficial
+              800: '#5C3317',
+              900: '#4A2814',
+              950: '#2A1408'
+            },
+            sacredgold: {
+              100: '#FBF5DE',
+              200: '#F4E7AC',
+              300: '#EAD577',
+              400: '#DFC24C',
+              500: '#D4AF37', // Oro litúrgico
+              600: '#B89426',
+              700: '#937319',
+              800: '#6E5513'
+            }
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            script: ['"Great Vibes"', 'cursive'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos del Proyecto -->
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="bg-franciscan-50 text-stone-900 font-sans antialiased selection:bg-amber-200 selection:text-amber-950 overflow-x-hidden">
+
+  <!-- Foco de luz ambiental que sigue al cursor en computadoras (Sección 7) -->
+  <div id="cursor-spotlight" aria-hidden="true"></div>
+
+  <!-- Banner de Advertencia Sin Conexión (Sección 11) -->
+  <div id="offline-banner" class="hidden fixed top-0 inset-x-0 z-50 bg-amber-700 text-white text-xs sm:text-sm font-medium py-2.5 px-4 text-center shadow-lg transition-all flex items-center justify-center gap-3">
+    <span>⚠️ <strong>Parece que hemos perdido la conexión.</strong> Revisa tu conexión a internet.</span>
+    <button id="offline-banner-retry" class="underline hover:text-amber-200 font-bold ml-2">Reintentar</button>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 2. PANTALLA DE INTRODUCCIÓN Y ANIMACIÓN DE LOGO (STROKE DRAWING)      -->
+  <!-- ==================================================================== -->
+  <script>
+    // Fail-safe global de ejecución inmediata para omitir o cerrar la bienvenida
+    window.dismissIntroScreen = function(immediate) {
+      try {
+        sessionStorage.setItem('capilla_sanfrancisco_intro_seen_v1', 'true');
+      } catch (e) {}
+
+      var screen = document.getElementById('intro-screen');
+      if (screen) {
+        if (immediate) {
+          screen.style.display = 'none';
+          screen.classList.add('hidden');
+        } else {
+          screen.classList.add('fade-out-intro');
+          setTimeout(function() {
+            screen.style.display = 'none';
+            screen.classList.add('hidden');
+          }, 500);
+        }
+      }
+      document.body.classList.remove('overflow-hidden');
+      window.dispatchEvent(new CustomEvent('capilla:introFinished'));
+    };
+
+    // Comprobar si ya fue vista en la sesión actual o si se prefiere movimiento reducido
+    try {
+      if (sessionStorage.getItem('capilla_sanfrancisco_intro_seen_v1') === 'true' ||
+          (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        document.write('<style id="capilla-hide-intro-style">#intro-screen { display: none !important; }</style>');
+      }
+    } catch(e) {}
+
+    // Escuchar tecla ESC de inmediato a nivel de ventana
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        window.dismissIntroScreen(true);
+      }
+    });
+
+    // Temporizador de seguridad: Si tras 5 segundos sigue visible, se retira automáticamente
+    setTimeout(function() {
+      var screen = document.getElementById('intro-screen');
+      if (screen && screen.style.display !== 'none' && !screen.classList.contains('hidden')) {
+        window.dismissIntroScreen(false);
+      }
+    }, 5000);
+  </script>
+
+  <div
+    id="intro-screen"
+    class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-950 text-white transition-opacity duration-700 p-4 select-none"
+    role="dialog"
+    aria-label="Animación de bienvenida a la Capilla San Francisco de Asís"
+  >
+    <!-- Fondo celestial y resplandor sutil -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.12)_0%,rgba(121,70,37,0.08)_40%,#0c0a09_85%)] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-lg w-full text-center flex flex-col items-center">
+      
+      <!-- LOGO VECTORIAL CON ANIMACIÓN DE TRAZO Y RESPLANDOR DORADO -->
+      <div class="relative w-64 h-64 sm:w-72 sm:h-72 mb-6 flex items-center justify-center">
+        
+        <!-- Destello de resplandor dorado -->
+        <div class="absolute inset-0 rounded-full bg-sacredgold-500/10 blur-2xl animate-pulse pointer-events-none"></div>
+
+        <svg
+          class="w-full h-full gold-glow drop-shadow-[0_0_20px_rgba(212,175,55,0.35)]"
+          viewBox="0 0 300 300"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- 1. Silueta del Hábito y Manto de San Francisco (Stroke Dibujado) -->
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 60 120 C 70 80, 110 95, 150 95 C 190 95, 230 80, 240 120 C 230 145, 205 130, 175 145 L 185 240 C 185 255, 140 260, 125 245 L 125 145 C 95 130, 70 145, 60 120 Z"
+            stroke="#D4AF37"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+          <!-- Relleno progresivo del hábito tras el trazo -->
+          <path
+            class="reveal-fill"
+            d="M 60 120 C 70 80, 110 95, 150 95 C 190 95, 230 80, 240 120 C 230 145, 205 130, 175 145 L 185 240 C 185 255, 140 260, 125 245 L 125 145 C 95 130, 70 145, 60 120 Z"
+            fill="#794625"
+          />
+
+          <!-- 2. Capucha / Cabeza de San Francisco -->
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 125 90 C 125 65, 175 65, 175 90 C 175 98, 125 98, 125 90 Z"
+            stroke="#D4AF37"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+          <path
+            class="reveal-fill"
+            d="M 125 90 C 125 65, 175 65, 175 90 C 175 98, 125 98, 125 90 Z"
+            fill="#794625"
+          />
+
+          <!-- 3. Cruz Blanca y Gablete del Pecho (Techo de la Capilla / Cruz de San Damián) -->
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 105 125 L 150 100 L 195 125"
+            stroke="#FFFFFF"
+            stroke-width="3.5"
+            stroke-linecap="round"
+          />
+          <!-- Cruz Latina Central en Blanco Puro -->
+          <line
+            class="draw-stroke animating-stroke"
+            x1="150" y1="88" x2="150" y2="122"
+            stroke="#FFFFFF"
+            stroke-width="4.5"
+            stroke-linecap="round"
+          />
+          <line
+            class="draw-stroke animating-stroke"
+            x1="138" y1="98" x2="162" y2="98"
+            stroke="#FFFFFF"
+            stroke-width="4.5"
+            stroke-linecap="round"
+          />
+
+          <!-- 4. Cordón Franciscano con 3 Nudos (Pobreza, Castidad, Obediencia) -->
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 125 158 Q 150 162 175 158"
+            stroke="#FFFFFF"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 166 160 L 166 200"
+            stroke="#FFFFFF"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+          <!-- 3 Nudos característicos del cordón franciscano -->
+          <circle class="reveal-fill" cx="166" cy="172" r="3.5" fill="#FFFFFF" />
+          <circle class="reveal-fill" cx="166" cy="184" r="3.5" fill="#FFFFFF" />
+          <circle class="reveal-fill" cx="166" cy="196" r="3.5" fill="#FFFFFF" />
+
+          <!-- 5. Paloma de la Paz posada sobre el hombro izquierdo -->
+          <path
+            class="draw-stroke animating-stroke"
+            d="M 220 85 C 224 76, 235 74, 238 78 C 242 82, 236 88, 230 90 C 224 92, 218 89, 220 85 Z"
+            stroke="#D4AF37"
+            stroke-width="2"
+            fill="#D4AF37"
+          />
+        </svg>
+      </div>
+
+      <!-- Texto Institucional revelado suavemente -->
+      <div class="reveal-text">
+        <p class="font-cinzel text-xs uppercase tracking-[0.3em] text-sacredgold-400 mb-1">Capilla</p>
+        <h2 class="font-cinzel text-2xl sm:text-3xl font-bold text-white tracking-wide mb-1">
+          San Francisco <span class="font-script text-sacredgold-400 font-normal lowercase tracking-normal text-3xl sm:text-4xl ml-1">de Asís</span>
+        </h2>
+        <div class="w-32 h-[1px] bg-gradient-to-r from-transparent via-sacredgold-500 to-transparent mx-auto my-2.5"></div>
+        <p class="text-xs uppercase tracking-widest text-stone-300 font-medium">Parroquia La Santa Cruz · Diócesis de Chosica</p>
+        <p class="text-xs italic text-sacredgold-200/80 mt-2">"Paz y Bien a todos los que entran a esta casa de oración"</p>
+      </div>
+
+      <!-- Botón para omitir la introducción (con ejecución inmediata en click) -->
+      <button
+        id="intro-skip-btn"
+        onclick="window.dismissIntroScreen(true)"
+        class="mt-8 px-6 py-2.5 rounded-full border border-stone-600 hover:border-sacredgold-400 text-stone-400 hover:text-white text-xs tracking-wider uppercase transition-all duration-300 hover:bg-white/10 cursor-pointer relative z-30"
+        aria-label="Omitir pantalla de introducción y entrar directamente al portal"
+      >
+        Omitir Introducción <span class="text-[10px] text-stone-500 ml-1">(ESC)</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR Y CABECERA INSTITUCIONAL                -->
+  <!-- ==================================================================== -->
+  <header id="main-header" class="fixed top-0 inset-x-0 z-40 bg-franciscan-50/90 backdrop-blur-md border-b border-amber-900/10 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo e Identidad Visual Oficial -->
+      <a href="#hero" class="flex items-center gap-3.5 group">
+        <!-- Escudo SVG Oficial de San Francisco -->
+        <div class="w-11 h-11 rounded-xl bg-franciscan-700 text-white flex items-center justify-center p-1.5 shadow-md group-hover:bg-franciscan-900 transition-colors">
+          <svg class="w-full h-full text-sacredgold-300" viewBox="0 0 100 100" fill="currentColor">
+            <!-- Cabeza -->
+            <circle cx="50" cy="22" r="10" />
+            <!-- Manto -->
+            <path d="M20 38 Q50 30 80 38 L84 52 Q68 44 57 48 L62 90 Q50 93 38 90 L43 48 Q32 44 16 52 Z" />
+            <!-- Cruz blanca interior -->
+            <path d="M47 34 L53 34 L53 47 L47 47 Z" fill="#FFFFFF" />
+            <path d="M42 39 L58 39 L58 43 L42 43 Z" fill="#FFFFFF" />
+            <!-- Paloma en el hombro -->
+            <circle cx="78" cy="30" r="3" fill="#D4AF37" />
+          </svg>
+        </div>
+        <div>
+          <span class="block text-[10px] uppercase tracking-[0.25em] text-franciscan-600 font-cinzel font-semibold">Capilla</span>
+          <span class="font-cinzel font-bold text-lg sm:text-xl text-stone-900 leading-tight block group-hover:text-franciscan-700 transition-colors">
+            San Francisco <span class="font-script text-franciscan-700 text-xl font-normal lowercase tracking-normal">de Asís</span>
+          </span>
+          <span class="hidden sm:block text-[10px] text-stone-500 uppercase tracking-wider">Parroquia La Santa Cruz · Chosica</span>
+        </div>
+      </a>
+
+      <!-- Menú de Navegación de Escritorio -->
+      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-700" aria-label="Navegación principal">
+        <a href="#hero" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Inicio</a>
+        <a href="#comunidad" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Nuestra Capilla</a>
+        <a href="#servicios" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Servicios y Misas</a>
+        <a href="#informes" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Todos los Informes</a>
+        <a href="#faq" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Preguntas Frecuentes</a>
+        <a href="#contacto" class="nav-link-item hover:text-franciscan-700 transition-colors py-1 border-b-2 border-transparent hover:border-sacredgold-500">Ubicación</a>
+      </nav>
+
+      <!-- Botón de Acción Principal y Menú Móvil -->
+      <div class="flex items-center gap-3">
+        <button
+          class="open-intention-modal-btn hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-franciscan-700 hover:bg-franciscan-900 text-white text-xs font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-200"
+        >
+          <svg class="w-4 h-4 text-sacredgold-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Anotar Intención de Misa</span>
+        </button>
+
+        <!-- Botón Hamburguesa Móvil -->
+        <button
+          id="mobile-menu-btn"
+          class="lg:hidden p-2 rounded-xl text-stone-700 hover:bg-stone-200/60 focus:outline-none"
+          aria-label="Abrir menú de navegación"
+        >
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Drawer Menú Móvil Desplegable Elegante (Sección 12) -->
+  <div id="mobile-drawer-backdrop" class="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  <aside
+    id="mobile-drawer"
+    class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-xs bg-franciscan-50 shadow-2xl translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between p-6 overflow-y-auto"
+    aria-label="Menú móvil"
+  >
+    <div>
+      <div class="flex items-center justify-between pb-5 border-b border-stone-200">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-franciscan-700 text-white flex items-center justify-center">
+            <span class="text-xs font-bold text-sacredgold-300">✝</span>
+          </div>
+          <span class="font-cinzel font-bold text-sm text-stone-900">Capilla San Francisco</span>
+        </div>
+        <button id="close-drawer-btn" class="p-2 text-stone-500 hover:text-stone-900" aria-label="Cerrar menú móvil">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex flex-col gap-3 py-6 text-base font-medium text-stone-800">
+        <a href="#hero" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Inicio</a>
+        <a href="#comunidad" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Nuestra Capilla</a>
+        <a href="#servicios" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Horarios y Servicios</a>
+        <a href="#informes" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Todos los Informes</a>
+        <a href="#faq" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Preguntas Frecuentes</a>
+        <a href="#contacto" class="nav-link-item py-2 px-3 rounded-lg hover:bg-stone-200/60">Ubicación y Despacho</a>
+      </nav>
+
+      <button
+        class="open-intention-modal-btn w-full py-3 rounded-xl bg-franciscan-700 text-white text-sm font-semibold shadow-md flex items-center justify-center gap-2 mb-4"
+      >
+        <span>Anotar Intención de Misa</span>
+      </button>
+    </div>
+
+    <div class="pt-6 border-t border-stone-200 text-xs text-stone-500 space-y-2">
+      <p class="font-medium text-stone-700">Parroquia La Santa Cruz · Chosica</p>
+      <p>Tel: +51 987 654 321</p>
+      <button class="replay-intro-btn text-franciscan-700 underline font-semibold mt-2 block">
+        Ver animación de bienvenida
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================================================================== -->
+  <!-- 3. HERO SECTION Y GALERÍA VISUAL DE ALTO IMPACTO                     -->
+  <!-- ==================================================================== -->
+  <section id="hero" class="relative min-h-[92vh] flex items-center justify-center overflow-hidden pt-20 bg-stone-950 text-white">
+    
+    <!-- Slideshow Sacro con Ken Burns y Overlays Oscuros para Legibilidad -->
+    <div id="hero-slider" class="absolute inset-0 z-0">
+      
+      <!-- Slide 1: Cristo Salvador / Resplandor Sacro -->
+      <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100">
+        <img
+          src="https://images.unsplash.com/photo-1548625361-195fe868018e?auto=format&fit=crop&w=1920&q=85"
+          alt="Altar mayor y celebración eucarística de la fe católica"
+          class="w-full h-full object-cover ken-burns-active"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/40"></div>
+        <div class="absolute inset-0 bg-franciscan-900/30 mix-blend-multiply"></div>
+      </div>
+
+      <!-- Slide 2: Cruz Franciscana de San Damián y Arquitectura Religiosa -->
+      <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&w=1920&q=85"
+          alt="Cruz cristiana iluminada por la luz divina en arquitectura religiosa"
+          class="w-full h-full object-cover ken-burns-active"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/40"></div>
+        <div class="absolute inset-0 bg-franciscan-900/30 mix-blend-multiply"></div>
+      </div>
+
+      <!-- Slide 3: Vitrales Sagrados y Luz Celestial -->
+      <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?auto=format&fit=crop&w=1920&q=85"
+          alt="Luz celestial atravesando vitrales de templo católico"
+          class="w-full h-full object-cover ken-burns-active"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/40"></div>
+        <div class="absolute inset-0 bg-franciscan-900/30 mix-blend-multiply"></div>
+      </div>
+
+      <!-- Slide 4: Comunidad Católica y Fraternidad -->
+      <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1920&q=85"
+          alt="Comunidad parroquial reunida en comunión y oración"
+          class="w-full h-full object-cover ken-burns-active"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/40"></div>
+        <div class="absolute inset-0 bg-franciscan-900/30 mix-blend-multiply"></div>
+      </div>
+
+    </div>
+
+    <!-- Contenido Institucional Central -->
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-20 text-center flex flex-col items-center">
+      
+      <!-- Badge de Identidad Franciscana -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-sacredgold-400/40 text-sacredgold-300 text-xs uppercase tracking-[0.2em] font-cinzel mb-6 shadow-lg animate-fade-in">
+        <span>✝ Parroquia La Santa Cruz · Diócesis de Chosica</span>
+      </div>
+
+      <!-- Título Principal Exacto Requerido -->
+      <h1 class="font-cinzel text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tight mb-5 drop-shadow-md">
+        Bienvenidos a nuestra comunidad de fe
+      </h1>
+
+      <!-- Subtítulo Exacto Requerido -->
+      <p class="font-serif italic text-xl sm:text-2xl text-sacredgold-200 font-light mb-4 max-w-2xl mx-auto drop-shadow">
+        "Un espacio de encuentro, oración y esperanza."
+      </p>
+
+      <p class="text-sm sm:text-base text-stone-300 font-light mb-10 max-w-xl mx-auto leading-relaxed">
+        Capilla San Francisco de Asís les da la más cordial bienvenida. Queremos ser un hogar abierto para la oración contemplativa, la fraternidad y el servicio al prójimo.
+      </p>
+
+      <!-- Botones de Llamada a la Acción -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+        <a
+          href="#servicios"
+          class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-sacredgold-500 hover:bg-sacredgold-400 text-stone-950 font-bold text-sm tracking-wide shadow-xl hover:shadow-2xl transition-all duration-200 text-center flex items-center justify-center gap-2 group"
+        >
+          <svg class="w-4 h-4 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Horarios de Misas y Servicios</span>
+        </a>
+
+        <a
+          href="#informes"
+          class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-semibold text-sm transition-all duration-200 text-center flex items-center justify-center gap-2"
+        >
+          <span>Ver Comunicados y Avisos</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </a>
+
+        <button
+          class="open-intention-modal-btn w-full sm:w-auto px-6 py-3.5 rounded-xl bg-franciscan-700 hover:bg-franciscan-600 text-white font-semibold text-sm transition-all duration-200 shadow-md text-center"
+        >
+          Anotar Intención
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Controles del Slider Hero -->
+    <button
+      id="hero-prev-btn"
+      class="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/40 hover:bg-black/70 text-white/80 hover:text-white backdrop-blur-sm border border-white/10 items-center justify-center transition-all duration-200"
+      aria-label="Diapositiva sacra anterior"
+    >
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <button
+      id="hero-next-btn"
+      class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/40 hover:bg-black/70 text-white/80 hover:text-white backdrop-blur-sm border border-white/10 items-center justify-center transition-all duration-200"
+      aria-label="Siguiente diapositiva sacra"
+    >
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+
+    <!-- Indicadores de Slide (Dots) -->
+    <div id="hero-dots-container" class="absolute bottom-8 z-20 flex items-center justify-center gap-2"></div>
+  </section>
+
+  <!-- Barra Rápida de Horarios Destacados Debajo del Hero -->
+  <section class="bg-franciscan-900 text-amber-100 py-4 px-4 border-y border-sacredgold-500/30">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+      <div class="flex items-center gap-3 justify-center md:justify-start">
+        <span class="text-sacredgold-400 font-bold text-lg">✝</span>
+        <div>
+          <strong class="text-white block font-cinzel">Misas Dominicales:</strong>
+          <span class="text-stone-300">8:00 AM · 11:00 AM (Solemne) · 7:00 PM</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 justify-center">
+        <span class="text-sacredgold-400 font-bold text-lg">🕊️</span>
+        <div>
+          <strong class="text-white block font-cinzel">Confesiones y Penitencia:</strong>
+          <span class="text-stone-300">Jueves y Sábados 5:30 PM a 6:45 PM</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 justify-center md:justify-end">
+        <span class="text-sacredgold-400 font-bold text-lg">📍</span>
+        <div>
+          <strong class="text-white block font-cinzel">Despacho Parroquial:</strong>
+          <span class="text-stone-300">Mar a Sáb: 9:00 AM - 1:00 PM y 4:00 - 7:30 PM</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 1 & 4. ESPIRITUALIDAD Y COMUNIDAD FRANCISCANA                         -->
+  <!-- ==================================================================== -->
+  <section id="comunidad" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <!-- Columna Izquierda: Imagen y Sello de Fe -->
+      <div class="relative">
+        <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+          <img
+            src="https://images.unsplash.com/photo-1548625361-195fe868018e?auto=format&fit=crop&w=1200&q=80"
+            alt="Interior del templo con luz celestial"
+            loading="lazy"
+            class="w-full h-[440px] object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-franciscan-950/80 via-transparent to-transparent"></div>
+          <div class="absolute bottom-6 left-6 right-6 text-white">
+            <span class="text-xs uppercase tracking-widest text-sacredgold-400 font-semibold font-cinzel">Carisma Franciscano</span>
+            <p class="font-cinzel text-xl font-bold mt-1">"Señor, hazme un instrumento de tu paz"</p>
+          </div>
+        </div>
+
+        <!-- Tarjeta Flotante con el Lema Franciscano -->
+        <div class="absolute -bottom-6 -right-4 sm:right-6 bg-white p-5 rounded-2xl shadow-xl border border-stone-200/90 max-w-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-franciscan-100 text-franciscan-700 flex items-center justify-center font-bold text-lg">
+              TAU
+            </div>
+            <div>
+              <h4 class="font-cinzel font-bold text-sm text-stone-900">Paz y Bien</h4>
+              <p class="text-xs text-stone-500">Fraternidad, alegría y cuidado de la creación.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Texto Pastoral -->
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-franciscan-100 text-franciscan-800 text-xs uppercase tracking-widest font-semibold mb-4">
+          <span>Nuestra Identidad</span>
+        </div>
+
+        <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-stone-900 mb-6 leading-tight">
+          Una comunidad viva que camina en la fe, la esperanza y el amor
+        </h2>
+
+        <p class="text-stone-700 leading-relaxed mb-4 text-base">
+          La <strong>Capilla San Francisco de Asís</strong>, perteneciente a la <strong>Parroquia La Santa Cruz</strong> en la <strong>Diócesis de Chosica</strong>, es un espacio sagrado donde cada persona y familia encuentra consuelo, acogida y alimento espiritual en la Eucaristía y la Palabra de Dios.
+        </p>
+
+        <p class="text-stone-600 leading-relaxed mb-6 text-sm">
+          Inspirados por el ejemplo de San Francisco de Asís, promovemos una fe humilde, sencilla y alegre, comprometida con los enfermos, los más vulnerables a través de Cáritas y la formación de nuevas generaciones en los valores del Evangelio.
+        </p>
+
+        <!-- Puntos Clave de Identidad -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-200">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-sacredgold-100 text-franciscan-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+              ✓
+            </div>
+            <div>
+              <strong class="text-sm text-stone-900 block font-cinzel">Liturgia Solemne</strong>
+              <span class="text-xs text-stone-600">Celebraciones con dignidad, coro sacro y respeto.</span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-sacredgold-100 text-franciscan-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+              ✓
+            </div>
+            <div>
+              <strong class="text-sm text-stone-900 block font-cinzel">Pastoral Solidaria</strong>
+              <span class="text-xs text-stone-600">Ayuda fraterna y acompañamiento a los necesitados.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 4. SECCIÓN DE INFORMACIÓN Y SERVICIOS ("Información y Servicios")     -->
+  <!-- ==================================================================== -->
+  <section id="servicios" class="py-20 px-4 sm:px-6 lg:px-8 bg-stone-100/70 border-t border-stone-200">
+    <div class="max-w-7xl mx-auto">
+      
+      <!-- Encabezado de Sección -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.2em] bg-franciscan-700 text-amber-100 mb-3">
+          Vida Sacramental y Parroquial
+        </span>
+        <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
+          Información y Servicios
+        </h2>
+        <p class="text-stone-600 text-sm sm:text-base leading-relaxed">
+          Ponemos a tu disposición los horarios de culto, requisitos de sacramentos y servicios pastorales. Selecciona cualquier tarjeta para consultar detalles completos y guías de trámite.
+        </p>
+
+        <!-- Filtros por Categoría de Servicio -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-8" role="tablist">
+          <button class="service-filter-btn active-filter px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-franciscan-700 text-white transition-all shadow-sm" data-category="todos">
+            Todos los Servicios
+          </button>
+          <button class="service-filter-btn px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-white text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="liturgia">
+            Liturgia y Culto
+          </button>
+          <button class="service-filter-btn px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-white text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="sacramentos">
+            Sacramentos
+          </button>
+          <button class="service-filter-btn px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-white text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="formacion">
+            Catequesis y Formación
+          </button>
+          <button class="service-filter-btn px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-white text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="pastoral">
+            Pastoral y Caritas
+          </button>
+          <button class="service-filter-btn px-4 py-2 rounded-xl text-xs font-semibold tracking-wide bg-white text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="institucional">
+            Despacho y Ubicación
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula Dinámica de las 9 Tarjetas Requeridas (Renderizadas desde services-data.js) -->
+      <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Render dinámico ejecutado por app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 6. SECCIÓN DE INFORMES Y AVISOS ("Todos los Informes")               -->
+  <!-- ==================================================================== -->
+  <section id="informes" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    
+    <!-- Encabezado y Barra de Búsqueda Reactiva -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div>
+        <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.2em] bg-sacredgold-100 text-franciscan-900 border border-sacredgold-300 mb-3">
+          Comunicación Comunitaria
+        </span>
+        <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-stone-900 mb-2">
+          Todos los Informes y Avisos
+        </h2>
+        <p class="text-sm text-stone-600 max-w-xl">
+          Comunicados oficiales, próximas fiestas litúrgicas, eventos pastorales y boletín de la Capilla San Francisco de Asís.
+        </p>
+      </div>
+
+      <!-- Buscador en tiempo real -->
+      <div class="w-full md:w-80 relative">
+        <label for="reports-search-input" class="sr-only">Buscar comunicados o avisos</label>
+        <div class="relative">
+          <input
+            type="text"
+            id="reports-search-input"
+            placeholder="Buscar avisos o comunicados..."
+            class="w-full pl-10 pr-9 py-2.5 rounded-xl border border-stone-300 bg-white text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none transition-all shadow-sm"
+          />
+          <svg class="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <button id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 text-xs font-bold" aria-label="Limpiar búsqueda">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros por Categoría de Avisos -->
+    <div class="flex flex-wrap items-center gap-2 mb-8">
+      <button class="report-filter-chip active-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-franciscan-700 text-white transition-all shadow-sm" data-category="todos">
+        Todos
+      </button>
+      <button class="report-filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="eventos">
+        Fiesta Patronal y Eventos
+      </button>
+      <button class="report-filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="comunicados">
+        Comunicados Oficiales
+      </button>
+      <button class="report-filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="pastoral">
+        Pastoral Social y Caritas
+      </button>
+      <button class="report-filter-chip px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 hover:bg-stone-200 transition-all border border-stone-200" data-category="liturgia">
+        Espiritualidad
+      </button>
+    </div>
+
+    <!-- Cuadrícula Dinámica de Informes (Renderizada desde reports-data.js) -->
+    <div id="reports-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      <!-- Render dinámico ejecutado por app.js -->
+    </div>
+
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 8. SECCIÓN DE PREGUNTAS FRECUENTES (FAQ ACORDEÓN)                    -->
+  <!-- ==================================================================== -->
+  <section id="faq" class="py-20 px-4 sm:px-6 lg:px-8 bg-stone-100/70 border-t border-stone-200">
+    <div class="max-w-4xl mx-auto">
+      
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.2em] bg-franciscan-700 text-amber-100 mb-3">
+          Orientación Parroquial
+        </span>
+        <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
+          Preguntas Frecuentes
+        </h2>
+        <p class="text-sm sm:text-base text-stone-600">
+          Respuestas claras a las dudas más comunes de nuestros feligreses sobre sacramentos y vida eclesial.
+        </p>
+      </div>
+
+      <div class="space-y-4" role="region" aria-label="Acordeón de Preguntas Frecuentes">
+        
+        <!-- FAQ 1 -->
+        <div class="faq-item bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <button class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-serif text-base sm:text-lg font-bold text-stone-900 focus:outline-none" aria-expanded="false">
+            <span>¿Con cuánta anticipación debo solicitar una intención de Misa?</span>
+            <svg class="faq-icon w-5 h-5 text-franciscan-700 shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+            Las intenciones de misa (por salud, eterno descanso de difuntos o acción de gracias) se pueden registrar en el despacho parroquial o a través del botón de WhatsApp del sitio web hasta 30 minutos antes del inicio de cada celebración.
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <button class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-serif text-base sm:text-lg font-bold text-stone-900 focus:outline-none" aria-expanded="false">
+            <span>¿Cuáles son los requisitos principales para el Bautizo de un niño?</span>
+            <svg class="faq-icon w-5 h-5 text-franciscan-700 shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+            Se requiere la partida de nacimiento del niño emitida por RENIEC, copias de DNI de los padres y padrinos, y la asistencia obligatoria a la charla prebautismal. Los padrinos deben ser católicos practicantes que hayan recibido los tres sacramentos de iniciación (Bautismo, Comunión y Confirmación).
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <button class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-serif text-base sm:text-lg font-bold text-stone-900 focus:outline-none" aria-expanded="false">
+            <span>¿Cómo se coordina la visita del sacerdote o ministro a un enfermo en casa?</span>
+            <svg class="faq-icon w-5 h-5 text-franciscan-700 shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+            Para la Unción de los Enfermos o la Sagrada Comunión a hermanos postrados en cama, los familiares pueden acudir al despacho parroquial o escribir a la línea de WhatsApp de urgencia espiritual disponible en la sección de contacto.
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+          <button class="faq-header w-full p-5 text-left flex items-center justify-between gap-4 font-serif text-base sm:text-lg font-bold text-stone-900 focus:outline-none" aria-expanded="false">
+            <span>¿Cómo puedo integrarme al coro o a la Juventud Franciscana (JUFRA)?</span>
+            <svg class="faq-icon w-5 h-5 text-franciscan-700 shrink-0 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-content hidden px-5 pb-5 text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+            Las puertas están abiertas para todas las personas con vocación de servicio. Los ensayos de coro se realizan los viernes por la noche y las reuniones de JUFRA los sábados a las 5:00 p.m. en los salones de la capilla.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 4 & 8. UBICACIÓN, HORARIOS DE DESPACHO Y CONTACTO                     -->
+  <!-- ==================================================================== -->
+  <section id="contacto" class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <!-- Información de Despacho y Accesos -->
+      <div>
+        <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.2em] bg-franciscan-100 text-franciscan-900 mb-3">
+          Atención y Despacho
+        </span>
+        <h2 class="font-cinzel text-3xl sm:text-4xl font-bold text-stone-900 mb-6">
+          Ubicación y Despacho Parroquial
+        </h2>
+
+        <div class="space-y-6 text-sm text-stone-700">
+          
+          <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-franciscan-100 text-franciscan-700 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <strong class="font-cinzel text-stone-900 block text-base mb-1">Dirección:</strong>
+              <p>Jr. Los Franciscanos s/n (Ref. Altura Paradero La Santa Cruz)</p>
+              <p class="text-stone-500 text-xs mt-0.5">Chosica, Lima - Diócesis de Chosica, Perú</p>
+              <div class="mt-2 text-[11px] text-amber-800 italic bg-amber-50 px-2 py-1 rounded inline-block border border-amber-200">
+                [Dato de ejemplo editable para la capilla]
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-sacredgold-100 text-sacredgold-800 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <strong class="font-cinzel text-stone-900 block text-base mb-1">Horario de Secretaría:</strong>
+              <p><strong>Martes a Sábado:</strong> 09:00 a.m. a 01:00 p.m. y 04:00 p.m. a 07:30 p.m.</p>
+              <p><strong>Domingos:</strong> Atención preferencial tras las misas de la mañana.</p>
+              <p class="text-stone-500 text-xs mt-1">Lunes cerrado por descanso pastoral.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-stone-200 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <div>
+              <strong class="font-cinzel text-stone-900 block text-base mb-1">Teléfonos y WhatsApp:</strong>
+              <p>Secretaría: <span class="font-semibold">+51 987 654 321</span></p>
+              <p>Fijo Parroquial: +51 (01) 360-0000</p>
+              <p class="text-stone-500 text-xs mt-0.5">Correo: secretaria.sanfrancisco@diocesisdechosica.org</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Mapa Interactivo / Representación Visual Noble -->
+      <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-stone-900 min-h-[420px] flex flex-col justify-between p-8 text-white">
+        <!-- Mapa de fondo estilizado -->
+        <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        
+        <div class="relative z-10">
+          <span class="inline-block px-3 py-1 rounded-full bg-sacredgold-500/20 text-sacredgold-300 text-xs font-semibold border border-sacredgold-400/40 mb-3">
+            Guía de Acceso en Chosica
+          </span>
+          <h3 class="font-cinzel text-2xl font-bold">¿Cómo llegar a la Capilla?</h3>
+          <p class="text-stone-300 text-sm mt-2 leading-relaxed">
+            Desde Lima o Ate: Tomar cualquier línea de transporte con dirección a Chosica por la Carretera Central. Bajarse a la altura del <strong>Paradero La Santa Cruz</strong> y caminar 2 cuadras hacia el Jr. Los Franciscanos.
+          </p>
+        </div>
+
+        <div class="relative z-10 bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/20 mt-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-sacredgold-300 font-semibold uppercase">Ubicación Georreferenciada</p>
+              <p class="text-white text-sm font-medium">Chosica, Lima, Perú</p>
+            </div>
+            <a
+              href="https://maps.google.com/?q=Chosica,Lima,Peru"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-4 py-2 rounded-xl bg-sacredgold-500 hover:bg-sacredgold-400 text-stone-950 font-bold text-xs tracking-wide transition-all shadow-md flex items-center gap-1.5"
+            >
+              <span>Abrir en Google Maps</span>
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================================================================== -->
+  <!-- 8. FOOTER Y SECCIONES INSTITUCIONALES                                -->
+  <!-- ==================================================================== -->
+  <footer class="bg-franciscan-950 text-stone-300 border-t border-amber-900/40 pt-16 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
+        
+        <!-- Columna 1: Identidad y Lema -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-franciscan-800 text-sacredgold-400 flex items-center justify-center font-bold text-lg border border-sacredgold-500/30">
+              ✝
+            </div>
+            <div>
+              <span class="block text-[10px] uppercase tracking-widest text-sacredgold-400 font-cinzel">Capilla</span>
+              <span class="font-cinzel font-bold text-white text-lg leading-tight">San Francisco de Asís</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-stone-400 leading-relaxed">
+            Parroquia La Santa Cruz · Diócesis de Chosica. Un espacio de acogida sacramental y crecimiento espiritual en fraternidad evangélica.
+          </p>
+
+          <p class="font-script text-sacredgold-300 text-2xl">
+            "Paz y Bien a todos"
+          </p>
+
+          <div class="flex items-center gap-3 pt-2">
+            <!-- Redes Sociales Configurables -->
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-stone-800 hover:bg-franciscan-700 text-stone-300 hover:text-white flex items-center justify-center transition-colors" aria-label="Facebook Parroquial">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-stone-800 hover:bg-franciscan-700 text-stone-300 hover:text-white flex items-center justify-center transition-colors" aria-label="YouTube Diócesis de Chosica">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://wa.me/51987654321" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-stone-800 hover:bg-emerald-700 text-stone-300 hover:text-white flex items-center justify-center transition-colors" aria-label="WhatsApp Secretaría">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.586 1.761.88 2.796.88 3.18 0 5.767-2.587 5.767-5.766.001-3.182-2.585-5.767-5.767-5.767zm7.505 5.767c0 4.137-3.366 7.503-7.505 7.503-1.282 0-2.484-.324-3.535-.898l-4.496 1.178 1.2-4.379c-.663-1.1-1.044-2.39-1.044-3.404 0-4.137 3.367-7.504 7.875-7.504 4.138 0 7.505 3.367 7.505 7.504z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Columna 2: Horarios de Misas -->
+        <div>
+          <h4 class="font-cinzel font-bold text-white text-sm uppercase tracking-wider mb-4 text-sacredgold-400">
+            Horarios de Misa
+          </h4>
+          <ul class="space-y-2.5 text-xs text-stone-400">
+            <li class="flex items-start gap-2">
+              <span class="text-sacredgold-400 font-bold">•</span>
+              <div>
+                <strong class="text-stone-200 block">Domingos:</strong>
+                <span>08:00 a.m. | 11:00 a.m. (Solemne) | 07:00 p.m.</span>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-sacredgold-400 font-bold">•</span>
+              <div>
+                <strong class="text-stone-200 block">Martes a Sábado:</strong>
+                <span>07:00 p.m. (Santo Rosario 06:30 p.m.)</span>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-sacredgold-400 font-bold">•</span>
+              <div>
+                <strong class="text-stone-200 block">Confesiones:</strong>
+                <span>Jueves y Sábados 5:30 p.m. a 6:45 p.m.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Columna 3: Enlaces Rápidos y Sacramentos -->
+        <div>
+          <h4 class="font-cinzel font-bold text-white text-sm uppercase tracking-wider mb-4 text-sacredgold-400">
+            Sacramentos y Vida
+          </h4>
+          <ul class="space-y-2 text-xs text-stone-400">
+            <li><a href="#servicios" class="hover:text-sacredgold-300 transition-colors">Bautizos comunitarios</a></li>
+            <li><a href="#servicios" class="hover:text-sacredgold-300 transition-colors">Matrimonios y expedientes</a></li>
+            <li><a href="#servicios" class="hover:text-sacredgold-300 transition-colors">Catequesis de Primera Comunión</a></li>
+            <li><a href="#servicios" class="hover:text-sacredgold-300 transition-colors">Pastoral de la Salud y Enfermos</a></li>
+            <li><a href="#informes" class="hover:text-sacredgold-300 transition-colors">Avisos e informes parroquiales</a></li>
+            <li><a href="#faq" class="hover:text-sacredgold-300 transition-colors">Preguntas frecuentes</a></li>
+          </ul>
+        </div>
+
+        <!-- Columna 4: Legal, Privacidad y Herramientas -->
+        <div>
+          <h4 class="font-cinzel font-bold text-white text-sm uppercase tracking-wider mb-4 text-sacredgold-400">
+            Transparencia y Legal
+          </h4>
+          <ul class="space-y-2 text-xs text-stone-400">
+            <li><button class="open-privacy-btn hover:text-sacredgold-300 transition-colors text-left">Política de Privacidad</button></li>
+            <li><button class="open-cookies-policy-btn hover:text-sacredgold-300 transition-colors text-left">Política de Cookies</button></li>
+            <li><button class="open-terms-btn hover:text-sacredgold-300 transition-colors text-left">Condiciones de Uso</button></li>
+            <li><button class="open-cookie-settings text-sacredgold-400 hover:underline text-left font-semibold">Configuración de Cookies</button></li>
+            <li><button class="replay-intro-btn text-stone-400 hover:text-white transition-colors text-left">Ver animación de bienvenida</button></li>
+          </ul>
+
+          <!-- Herramientas de Verificación para Revisores -->
+          <div class="mt-4 pt-3 border-t border-stone-800">
+            <span class="text-[10px] text-stone-500 uppercase tracking-wider block mb-1">Pruebas del Sistema:</span>
+            <div class="flex flex-wrap gap-1.5 text-[11px]">
+              <a href="404.html" class="px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-300">Pág. 404</a>
+              <a href="500.html" class="px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-300">Pág. 500</a>
+              <button class="test-offline-btn px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-stone-300">Test Offline</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie Inferior con Derechos Reservados -->
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
+        <p>© 2026 Capilla San Francisco de Asís. Parroquia La Santa Cruz · Diócesis de Chosica. Todos los derechos reservados.</p>
+        <p class="text-stone-400 italic">Desarrollado con solemnidad, seguridad y amor a la comunidad eclesial.</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==================================================================== -->
+  <!-- 5. BOTÓN FLOTANTE DE WHATSAPP (Sección 5)                            -->
+  <!-- ==================================================================== -->
+  <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+    
+    <!-- Ventana Emergente (Popover) de Saludo Elegante -->
+    <div
+      id="whatsapp-popover"
+      class="hidden mb-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden text-stone-800 transition-all transform origin-bottom-right"
+    >
+      <div class="bg-franciscan-700 text-white p-4 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-inner">
+            WA
+          </div>
+          <div>
+            <h5 class="font-cinzel font-bold text-sm leading-tight">Secretaría Parroquial</h5>
+            <span class="text-[10px] text-emerald-200 block">En línea para atenderte</span>
+          </div>
+        </div>
+        <button id="close-wa-popover" class="text-white/70 hover:text-white" aria-label="Cerrar ventana de WhatsApp">✕</button>
+      </div>
+
+      <div class="p-4 space-y-3 text-xs">
+        <p class="text-stone-700 leading-relaxed">
+          ¡Paz y Bien! 🕊️ ¿En qué podemos ayudarte hoy? Selecciona una opción rápida o escribe directamente a nuestro número:
+        </p>
+
+        <div class="space-y-1.5">
+          <button class="wa-quick-option w-full py-2 px-3 text-left rounded-lg bg-stone-100 hover:bg-franciscan-50 text-stone-800 hover:text-franciscan-800 font-medium transition-colors border border-stone-200/60" data-topic="misas">
+            📅 Horarios de Santa Misa
+          </button>
+          <button class="wa-quick-option w-full py-2 px-3 text-left rounded-lg bg-stone-100 hover:bg-franciscan-50 text-stone-800 hover:text-franciscan-800 font-medium transition-colors border border-stone-200/60" data-topic="intencion">
+            ✝️ Anotar Intención de Misa
+          </button>
+          <button class="wa-quick-option w-full py-2 px-3 text-left rounded-lg bg-stone-100 hover:bg-franciscan-50 text-stone-800 hover:text-franciscan-800 font-medium transition-colors border border-stone-200/60" data-topic="bautizo">
+            💧 Requisitos para Bautismo
+          </button>
+        </div>
+
+        <button
+          id="wa-send-default"
+          class="w-full mt-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow"
+        >
+          <span>Abrir chat de WhatsApp</span>
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.586 1.761.88 2.796.88 3.18 0 5.767-2.587 5.767-5.766.001-3.182-2.585-5.767-5.767-5.767zm7.505 5.767c0 4.137-3.366 7.503-7.505 7.503-1.282 0-2.484-.324-3.535-.898l-4.496 1.178 1.2-4.379c-.663-1.1-1.044-2.39-1.044-3.404 0-4.137 3.367-7.504 7.875-7.504 4.138 0 7.505 3.367 7.505 7.504z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Principal Redondo de WhatsApp -->
+    <button
+      id="floating-whatsapp-btn"
+      class="wa-float-btn w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center whatsapp-pulse transition-transform focus:outline-none"
+      aria-label="Abrir opciones de contacto por WhatsApp"
+    >
+      <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.586 1.761.88 2.796.88 3.18 0 5.767-2.587 5.767-5.766.001-3.182-2.585-5.767-5.767-5.767zm7.505 5.767c0 4.137-3.366 7.503-7.505 7.503-1.282 0-2.484-.324-3.535-.898l-4.496 1.178 1.2-4.379c-.663-1.1-1.044-2.39-1.044-3.404 0-4.137 3.367-7.504 7.875-7.504 4.138 0 7.505 3.367 7.505 7.504z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 9. BANNER Y MODAL DE CONSENTIMIENTO DE COOKIES                       -->
+  <!-- ==================================================================== -->
+  
+  <!-- Banner Inferior de Cookies -->
+  <div
+    id="cookie-banner"
+    class="hidden fixed bottom-0 inset-x-0 z-50 p-4 sm:p-6 bg-stone-950/95 backdrop-blur-md text-stone-200 border-t border-sacredgold-500/30 shadow-2xl transition-all duration-400 transform translate-y-full"
+    role="region"
+    aria-label="Aviso de privacidad y cookies"
+  >
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-xs sm:text-sm text-stone-300 leading-relaxed text-center md:text-left max-w-3xl">
+        <strong class="text-white font-cinzel">Respetamos tu privacidad y recogimiento espiritual:</strong>
+        Utilizamos cookies técnicas necesarias para el funcionamiento del portal y, solo si lo autorizas, métricas anónimas para mejorar nuestro servicio a la comunidad. No compartimos tus datos con anunciantes ni terceros. Puedes consultar nuestra <button class="open-privacy-btn underline text-sacredgold-400">Política de Privacidad</button>.
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-2.5 shrink-0">
+        <button
+          id="cookie-reject-optional"
+          class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold transition-colors border border-stone-700"
+        >
+          Rechazar opcionales
+        </button>
+
+        <button
+          id="cookie-open-settings"
+          class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors border border-white/20"
+        >
+          Configurar preferencias
+        </button>
+
+        <button
+          id="cookie-accept-all"
+          class="px-5 py-2 rounded-xl bg-sacredgold-500 hover:bg-sacredgold-400 text-stone-950 text-xs font-bold transition-all shadow-md"
+        >
+          Aceptar todas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configuración de Preferencias de Cookies -->
+  <div id="cookie-settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-franciscan-700 font-cinzel font-semibold">Privacidad Eclesial</span>
+          <h3 class="font-cinzel text-xl font-bold">Preferencias de Cookies</h3>
+        </div>
+        <button id="cookie-modal-close" class="text-stone-400 hover:text-stone-700" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="space-y-5 text-xs text-stone-600 mb-6">
+        <!-- Categoría 1: Necesarias -->
+        <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+          <div class="flex items-center justify-between mb-1">
+            <strong class="font-serif text-sm text-stone-900">Cookies Técnicas Necesarias</strong>
+            <span class="text-[10px] bg-stone-200 text-stone-800 px-2 py-0.5 rounded font-semibold">Siempre Activas</span>
+          </div>
+          <p class="leading-relaxed">Imprescindibles para recordar tus preferencias de privacidad, navegación segura y visualización correcta del sitio.</p>
+        </div>
+
+        <!-- Categoría 2: Analíticas -->
+        <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+          <div class="flex items-center justify-between mb-1">
+            <strong class="font-serif text-sm text-stone-900">Métricas y Rendimiento</strong>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="cookie-analytics" class="sr-only peer">
+              <div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-franciscan-700"></div>
+            </label>
+          </div>
+          <p class="leading-relaxed">Nos ayudan a conocer qué avisos o servicios son más consultados para organizar mejor la atención parroquial (datos agregados y 100% anónimos).</p>
+        </div>
+
+        <!-- Categoría 3: Funcionales y Redes -->
+        <div class="p-3.5 rounded-xl bg-stone-50 border border-stone-200">
+          <div class="flex items-center justify-between mb-1">
+            <strong class="font-serif text-sm text-stone-900">Funcionales y Multimedia</strong>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="cookie-marketing" class="sr-only peer">
+              <div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-franciscan-700"></div>
+            </label>
+          </div>
+          <p class="leading-relaxed">Permiten reproducir contenido multimedia embebido (como transmisiones de misa o mapas interactivos).</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+        <button
+          id="cookie-save-settings"
+          class="w-full py-3 rounded-xl bg-franciscan-700 hover:bg-franciscan-900 text-white font-semibold text-xs tracking-wide shadow-md transition-all"
+        >
+          Guardar mis preferencias
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODALES DE SERVICIOS, INFORMES, INTENCIONES Y POLÍTICAS LEGALES      -->
+  <!-- ==================================================================== -->
+
+  <!-- Modal Detalle de Servicio -->
+  <div id="service-detail-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-5">
+        <div>
+          <span id="modal-service-badge" class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300 mb-2">Sacramento</span>
+          <h3 id="modal-service-title" class="font-cinzel text-2xl font-bold text-stone-900 leading-tight">Título del Servicio</h3>
+          <p id="modal-service-subtitle" class="text-xs uppercase tracking-wider text-amber-800 font-semibold mt-1">Subtítulo</p>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar ventana">✕</button>
+      </div>
+
+      <p id="modal-service-description" class="text-sm text-stone-600 mb-6 leading-relaxed">
+        Descripción completa del servicio.
+      </p>
+
+      <!-- Horarios -->
+      <div class="mb-6">
+        <h4 class="font-cinzel font-bold text-sm text-stone-900 mb-3 flex items-center gap-2">
+          <span>📅 Horarios y Frecuencia:</span>
+        </h4>
+        <ul id="modal-service-schedules" class="space-y-2">
+          <!-- Dinámico -->
+        </ul>
+      </div>
+
+      <!-- Requisitos -->
+      <div class="mb-6">
+        <h4 class="font-cinzel font-bold text-sm text-stone-900 mb-3 flex items-center gap-2">
+          <span>📋 Requisitos y Documentación:</span>
+        </h4>
+        <ul id="modal-service-requirements" class="space-y-2">
+          <!-- Dinámico -->
+        </ul>
+      </div>
+
+      <!-- Nota editable -->
+      <div class="p-3 bg-stone-100 rounded-xl text-xs text-stone-500 italic mb-6 border border-stone-200">
+        * Todos los horarios y requisitos mostrados son datos de ejemplo provisionales editables por la secretaría parroquial.
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+        <button class="close-modal-btn px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-100">
+          Cerrar
+        </button>
+        <button id="modal-service-action-btn" class="px-6 py-2.5 rounded-xl bg-franciscan-700 hover:bg-franciscan-900 text-white text-xs font-bold shadow-md transition-all">
+          Anotar / Consultar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Lector de Informes y Avisos Completos -->
+  <div id="report-reader-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-5">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span id="modal-report-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300">Aviso</span>
+            <span id="modal-report-date" class="text-xs text-stone-500">Fecha</span>
+          </div>
+          <h3 id="modal-report-title" class="font-cinzel text-xl sm:text-2xl font-bold text-stone-900 leading-tight">Título del Comunicado</h3>
+          <p id="modal-report-author" class="text-xs text-stone-500 mt-1">Autor</p>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar comunicado">✕</button>
+      </div>
+
+      <div id="modal-report-image-container" class="mb-5 rounded-2xl overflow-hidden h-52 sm:h-64 bg-stone-900">
+        <img id="modal-report-image" src="" alt="" class="w-full h-full object-cover" />
+      </div>
+
+      <div id="modal-report-content" class="text-stone-700 text-sm leading-relaxed space-y-4 mb-6">
+        <!-- Contenido HTML del informe -->
+      </div>
+
+      <div class="flex items-center justify-between pt-5 border-t border-stone-200">
+        <button id="modal-report-share-wa" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow transition-colors">
+          <span>Compartir en WhatsApp</span>
+        </button>
+        <button class="close-modal-btn px-5 py-2 rounded-xl bg-stone-900 text-white text-xs font-semibold hover:bg-stone-800">
+          Cerrar lectura
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Formulario de Intenciones de Santa Misa (Sanitizado y Seguro) -->
+  <div id="intention-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-6">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-franciscan-700 font-cinzel font-semibold">Liturgia Sacramental</span>
+          <h3 class="font-cinzel text-2xl font-bold text-stone-900">Anotar Intención de Misa</h3>
+          <p class="text-xs text-stone-500 mt-1">Tu petición será colocada en el altar del Señor.</p>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar ventana">✕</button>
+      </div>
+
+      <form id="intention-form" class="space-y-4">
+        
+        <!-- Campo trampa antispam (Honeypot para bots) -->
+        <input type="text" name="bot_check_extra" class="hidden" tabindex="-1" autocomplete="off" />
+
+        <div>
+          <label for="intention-nombre" class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">Tu Nombre Completo *</label>
+          <input
+            type="text"
+            id="intention-nombre"
+            required
+            maxlength="100"
+            placeholder="Ej. María Elena Flores"
+            class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="intention-telefono" class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">Teléfono Móvil *</label>
+            <input
+              type="tel"
+              id="intention-telefono"
+              required
+              maxlength="15"
+              placeholder="+51 987 654 321"
+              class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none"
+            />
+          </div>
+
+          <div>
+            <label for="intention-tipo" class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">Motivo de la Intención *</label>
+            <select
+              id="intention-tipo"
+              class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none bg-white"
+            >
+              <option value="Por los Fieles Difuntos">Por los Fieles Difuntos</option>
+              <option value="Por la Salud y Sanación">Por la Salud y Sanación</option>
+              <option value="Acción de Gracias">Acción de Gracias</option>
+              <option value="Cumpleaños y Bendición Familiar">Cumpleaños y Bendición Familiar</option>
+              <option value="Intención Particular">Intención Particular</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="intention-fecha" class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">Fecha Preferida para la Misa</label>
+          <input
+            type="date"
+            id="intention-fecha"
+            class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none bg-white"
+          />
+        </div>
+
+        <div>
+          <label for="intention-texto" class="block text-xs font-bold text-stone-800 uppercase tracking-wider mb-1">Nombres de las Personas por quienes se ofrece *</label>
+          <textarea
+            id="intention-texto"
+            required
+            rows="3"
+            maxlength="300"
+            placeholder="Ej. Por el eterno descanso de Juan Pérez y consuelo de su familia..."
+            class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:border-franciscan-700 focus:ring-1 focus:ring-franciscan-700 outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+          🕊️ Al enviar este formulario, tu intención será preparada y se abrirá WhatsApp de secretaría para su confirmación inmediata. No se almacenan datos privados en bases de datos externas.
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button type="button" class="close-modal-btn px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-100">
+            Cancelar
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-franciscan-700 hover:bg-franciscan-900 text-white text-xs font-bold shadow-md transition-all">
+            Enviar Intención a Secretaría
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Modal de Política de Privacidad (Sección 9) -->
+  <div id="privacy-policy-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-5">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-franciscan-700 font-cinzel font-semibold">Marco Legal y Protección</span>
+          <h3 class="font-cinzel text-2xl font-bold">Política de Privacidad</h3>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="text-xs text-stone-700 space-y-3 leading-relaxed">
+        <p><strong>1. Responsable del Tratamiento:</strong> Capilla San Francisco de Asís, adscrita a la Parroquia La Santa Cruz y a la Diócesis de Chosica, Lima, Perú.</p>
+        <p><strong>2. Finalidad del Sitio:</strong> Este portal web tiene propósitos estrictamente pastorales, litúrgicos e informativos para la comunidad de fieles.</p>
+        <p><strong>3. Principio de No Recopilación Innecesaria:</strong> No exigimos la creación de cuentas de usuario ni almacenamos información confidencial de tarjetas de crédito o datos sensibles en servidores web.</p>
+        <p><strong>4. Comunicación por WhatsApp:</strong> Cuando el usuario se comunica a través del enlace de WhatsApp, la conversación se rige bajo el cifrado de extremo a extremo de dicha plataforma y los datos son utilizados exclusivamente para la gestión solicitada (como anotar una misa o resolver dudas de sacramentos).</p>
+        <p><strong>5. Derechos del Titular:</strong> En cumplimiento de la Ley N° 29733 (Ley de Protección de Datos Personales del Perú), cualquier persona puede solicitar la rectificación o supresión de sus datos de contacto en el despacho parroquial.</p>
+      </div>
+
+      <div class="pt-5 border-t border-stone-200 mt-6 text-right">
+        <button class="close-modal-btn px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Política de Cookies (Sección 9) -->
+  <div id="cookies-policy-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-5">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-franciscan-700 font-cinzel font-semibold">Transparencia Técnica</span>
+          <h3 class="font-cinzel text-2xl font-bold">Política de Cookies</h3>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="text-xs text-stone-700 space-y-3 leading-relaxed">
+        <p><strong>¿Qué son las cookies?</strong> Son pequeños archivos que se almacenan en tu dispositivo para recordar tus preferencias y ofrecerte una experiencia de navegación óptima.</p>
+        <p><strong>Cookies que utilizamos:</strong></p>
+        <ul class="list-disc list-inside space-y-1 ml-2">
+          <li><strong>Cookies Técnicas Necesarias:</strong> Almacenan tu decisión sobre cookies (<code>capilla_sanfrancisco_cookies_consent</code>) y la visualización de la animación de introducción (<code>sessionStorage</code>).</li>
+          <li><strong>Cookies Analíticas (Opcionales):</strong> Solo se activan si otorgas tu consentimiento expreso en el panel de configuración.</li>
+        </ul>
+        <p><strong>¿Cómo modificarlas?</strong> Puedes cambiar o retirar tu consentimiento en cualquier momento pulsando en "Configuración de Cookies" en el pie de página.</p>
+      </div>
+
+      <div class="pt-5 border-t border-stone-200 mt-6 text-right">
+        <button class="close-modal-btn px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Condiciones de Uso (Sección 9) -->
+  <div id="terms-conditions-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between pb-4 border-b border-stone-200 mb-5">
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-franciscan-700 font-cinzel font-semibold">Términos del Portal</span>
+          <h3 class="font-cinzel text-2xl font-bold">Condiciones de Uso</h3>
+        </div>
+        <button class="close-modal-btn text-stone-400 hover:text-stone-700 p-1" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="text-xs text-stone-700 space-y-3 leading-relaxed">
+        <p><strong>1. Uso Digno y Sagrado:</strong> Los contenidos, oraciones e imágenes de este sitio están destinados a la edificación espiritual y conocimiento de la vida parroquial. Queda prohibido su uso indebido, ofensivo o comercial no autorizado.</p>
+        <p><strong>2. Carácter de los Datos:</strong> Los horarios, avisos e informes publicados están sujetos a variaciones conforme al calendario litúrgico o disposiciones de la Diócesis de Chosica.</p>
+        <p><strong>3. Propiedad Intelectual:</strong> Los símbolos litúrgicos e imaginería sacra pertenecen al patrimonio de la Iglesia y a sus respectivos autores legítimos.</p>
+      </div>
+
+      <div class="pt-5 border-t border-stone-200 mt-6 text-right">
+        <button class="close-modal-btn px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Estado Sin Conexión (Sección 11) -->
+  <div id="offline-modal" class="capilla-modal hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 text-center">
+      
+      <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto mb-5 text-2xl font-bold">
+        🕊️
+      </div>
+
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 mb-3">
+        Estado de Conexión
+      </span>
+
+      <!-- Mensaje Exacto Requerido -->
+      <h3 class="font-cinzel text-2xl font-bold text-stone-900 mb-2">
+        "Parece que hemos perdido la conexión."
+      </h3>
+
+      <p class="text-stone-600 text-sm mb-6 leading-relaxed">
+        Revisa tu conexión a internet e inténtalo nuevamente.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button
+          id="offline-retry-btn"
+          class="px-6 py-2.5 rounded-xl bg-franciscan-700 hover:bg-franciscan-900 text-white font-semibold text-xs tracking-wide shadow-md transition-all"
+        >
+          Reintentar conexión
+        </button>
+        <button
+          id="offline-close-modal"
+          class="px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-100"
+        >
+          Cerrar aviso
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notificación Toast Global -->
+  <div
+    id="global-toast"
+    class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white border border-stone-700 px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 text-xs sm:text-sm transition-all duration-300 opacity-0 transform translate-y-4"
+    role="status"
+    aria-live="polite"
+  >
+    <span id="global-toast-icon">✝</span>
+    <span id="global-toast-message">Mensaje del sistema</span>
+  </div>
+
+  <!-- Script Principal Resiliente y Optimizado -->
+  <script defer src="assets/js/app.js"></script>
+</body>
+</html>
