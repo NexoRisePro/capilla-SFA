@@ -1,0 +1,131 @@
+/**
+ * ====================================================================
+ * ESTILOS PRINCIPALES - CAPILLA SAN FRANCISCO DE ASÍS
+ * Paleta de colores e identidad derivada del logo oficial:
+ * - Marrón Franciscano: #794625
+ * - Marrón Oscuro Habit: #4A2814
+ * - Dorado Litúrgico: #D4AF37 / #C5A059
+ * - Blanco Marfil: #FAF6F0
+ * - Beige Cálido / Pergamino: #F3ECE2
+ * - Negro Carbón: #1A1715
+ * ====================================================================
+ */
+
+:root {
+  --color-primary: #794625;
+  --color-primary-dark: #4A2814;
+  --color-primary-light: #965B33;
+  --color-gold: #D4AF37;
+  --color-gold-light: #F3E5AB;
+  --color-ivory: #FAF6F0;
+  --color-parchment: #F3ECE2;
+  --color-carbon: #1A1715;
+  --font-serif: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-script: 'Great Vibes', cursive;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* Tipografía de Caligrafía Franciscana */
+.font-script {
+  font-family: var(--font-script);
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+/* Textura sutil de pergamino sacral */
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-carbon);
+  font-family: var(--font-sans);
+  background-image: radial-gradient(rgba(121, 70, 37, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Encabezado fijo con efecto vidrio esmerilado */
+#main-header {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#main-header.header-scrolled {
+  background-color: rgba(250, 246, 240, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 25px -4px rgba(74, 40, 20, 0.1);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+/* Barra de desplazamiento personalizada */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: #F3ECE2;
+}
+::-webkit-scrollbar-thumb {
+  background: #794625;
+  border-radius: 6px;
+  border: 2px solid #F3ECE2;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4A2814;
+}
+
+/* Enfoque accesible */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* Efectos de elevación para tarjetas */
+.service-card, .report-card {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Divisores ornamentales con cruz central */
+.sacred-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  gap: 1rem;
+}
+.sacred-divider::before, .sacred-divider::after {
+  content: '';
+  height: 1px;
+  background: linear-gradient(to right, transparent, #D4AF37, transparent);
+  flex: 1;
+  max-width: 140px;
+}
+
+/* Acordeón FAQ */
+.faq-header {
+  transition: background-color 0.2s ease;
+}
+.faq-header:hover {
+  background-color: rgba(243, 236, 226, 0.7);
+}
+
+/* Modales */
+.capilla-modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Botón flotante de WhatsApp */
+.wa-float-btn {
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.wa-float-btn:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 35px rgba(37, 211, 102, 0.55);
+}
+
+/* Transiciones suaves en móviles */
+@media (max-width: 768px) {
+  .service-card {
+    transform: none !important;
+  }
+}
